@@ -1,0 +1,42 @@
+should be able to synthesize list copy
+
+#####
+
+{ true; sll (x,s) ** ans :-> ori_loc ** sll(ori_loc, acc)}
+void sll_copy (loc x, loc ans)
+{final_res == s ++ acc; ans :-> new_loc ** sll (new_loc, final_res) ** sll(x,s)}
+
+#####
+
+
+{ans :-> ori_loc ** sll(ori_loc, acc)<_alpha_11> ** sll(x, s)<_alpha_10>}
+{final_res == s + acc ; ans :-> new_loc ** sll(new_loc, final_res)<_alpha_12> ** sll(x, s)<_alpha_13>}
+void sll_copy (loc x, loc ans) {
+  let o = *ans;
+  if (o == 0) {
+    sll_copy00(x, ans);
+  } else {
+    let nx = *(o + 1);
+    *ans = nx;
+    sll_copy(x, ans);
+    let n = *ans;
+    *ans = o;
+    *(o + 1) = n;
+  }
+}
+
+{acc =i {} && not (a == 0) && ori_loc1 == 0 ; a :-> ori_loc1 ** sll(x, s)<_alpha_10>}
+{not (a == 0) ; a :-> new_loc ** sll(new_loc, s ++ acc)<_alpha_12> ** sll(x, s)<_alpha_13>}
+void sll_copy00 (loc x, loc a) {
+  if (x == 0) {
+  } else {
+    let v = *x;
+    let nx = *(x + 1);
+    sll_copy00(nx, a);
+    let ne = *a;
+    let n = malloc(2);
+    *a = n;
+    *(n + 1) = ne;
+    *n = v;
+  }
+}

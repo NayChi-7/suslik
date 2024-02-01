@@ -1,0 +1,32 @@
+should be able to synthesize tree size
+
+#####
+
+{ 0 <= n ; r :-> acc ** treeN(x,n) }
+void tree_size (loc x, loc r)
+{ final_res == acc + n; r :-> final_res ** treeN(x,n)}
+
+#####
+
+
+{0 <= n ; r :-> acc ** treeN(x, n)<_alpha_10>}
+{final_res == acc + n ; r :-> final_res ** treeN(x, n)<_alpha_11>}
+void tree_size (loc x, loc r) {
+  let a = *r;
+  if (x == 0) {
+  } else {
+    let l = *(x + 1);
+    let rx = *(x + 2);
+    *r = 0;
+    tree_size(l, r);
+    let n1 = *r;
+    *r = 0;
+    tree_size(rx, r);
+    let n = *r;
+    *r = a + 1 + n1 + n;
+  }
+}
+
+
+All the changes to the accumulator need to be done before (or after? Look at the example of tree flatten acc) the recursive call (Explicit) => then pass it over
+Reject the fiddling of the accumulator after the call

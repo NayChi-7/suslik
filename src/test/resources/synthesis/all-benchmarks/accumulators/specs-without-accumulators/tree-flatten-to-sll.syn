@@ -1,0 +1,50 @@
+# -p true
+
+should be able to flatten the tree into a list
+
+####
+
+{ z :-> x ** tree(x, s) }
+void flatten(loc z)
+{ z :-> y ** sll(y, s) }
+
+####
+
+
+{z :-> x ** tree(x, s)<_alpha_9>}
+{z :-> y ** sll(y, s)<_alpha_10>}
+void flatten (loc z) {
+  let x = *z;
+  if (x == 0) {
+  } else {
+    let v = *x;
+    let l = *(x + 1);
+    let r = *(x + 2);
+    *z = l;
+    flatten(z);
+    let y = *z;
+    *z = r;
+    flatten(z);
+    flatten130(y, v, x, z);
+  }
+}
+
+{_alpha_1x1 < _alpha_9 && _alpha_2x1 < _alpha_9 && not (x == 0) && not (x == z) && not (z == 0) ; (x + 1) :-> lx11 ** (x + 2) :-> rx11 ** x :-> v ** z :-> y2 ** sll(y1, s1x1)<_alpha_101>[1,0] ** sll(y2, s2x1)<_alpha_102>[1,0] ** [x, 3]}
+{not (z == 0) ; z :-> y ** sll(y, {v} ++ s1x1 ++ s2x1)<_alpha_10>}
+void flatten130 (loc y1, int v, loc x, loc z) {
+  let y2 = *z;
+  if (y1 == 0) {
+    let y = malloc(2);
+    free(x);
+    *z = y;
+    *(y + 1) = y2;
+    *y = v;
+  } else {
+    let n = *(y1 + 1);
+    flatten130(n, v, x, z);
+    let y = *z;
+    *z = y1;
+    *(y1 + 1) = y;
+  }
+}
+

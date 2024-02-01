@@ -1,0 +1,8 @@
+
+####
+
+{true ; lseg2(x1, y1, s1) ** lseg2(x2, y2, s2) ** ret :-> x2}
+void list_append (loc x1, loc ret)
+{s =i s1 ++ s2 ; lseg2(y, z, s) ** ret :-> y }
+
+####

@@ -1,0 +1,47 @@
+# -p true
+
+should be able to flatten the tree into a list
+
+####
+
+{ tree (x,s) ** ans :-> ori_loc ** sll(ori_loc, acc)}
+void flatten (loc x, loc ans)
+{ final_res == s ++ acc;  ans :-> new_loc ** sll (new_loc, final_res)}
+
+####
+
+
+{ans :-> ori_loc ** sll(ori_loc, acc)<_alpha_11> ** tree(x, s)<_alpha_10>}
+{final_res == s + acc ; ans :-> new_loc ** sll(new_loc, final_res)<_alpha_12>}
+void flatten (loc x, loc ans) {
+  let o = *ans; ## invoke recursion on the second var instead of the first one => potentially a hint that the system is bad
+  if (o == 0) {
+    flatten00(x, ans); ## discovery of this function is expensive
+  } else {
+    let nx = *(o + 1);
+    *ans = nx;
+    flatten(x, ans);
+    let n = *ans;
+    *ans = o;
+    *(o + 1) = n;
+  }
+}
+
+{acc =i {} && not (a == 0) && ori_loc1 == 0 ; a :-> ori_loc1 ** tree(x, s)<_alpha_10>}
+{not (a == 0) ; a :-> new_loc ** sll(new_loc, s ++ acc)<_alpha_12>}
+void flatten00 (loc x, loc a) {
+  if (x == 0) {
+  } else {
+    let v = *x;
+    let l = *(x + 1);
+    let r = *(x + 2);
+    flatten00(l, a);
+    flatten(r, a);
+    let ne = *a;
+    let n = malloc(2);
+    free(x);
+    *a = n;
+    *(n + 1) = ne;
+    *n = v;
+  }
+}

@@ -1,0 +1,59 @@
+predicate sll(loc x, set s) {
+|  x == 0        => { s == {} ; emp }
+|  not (x == 0)  => { s == {v} ++ s1 ; [x, 2] ** x :-> v ** (x + 1) :-> nxt ** sll(nxt, s1) }
+}
+
+predicate tree(loc x, set s) {
+|  x == 0        => {s == {} ; emp}
+|  not (x == 0)  => {s == {v} ++ s1 ++ s2 ;
+                     [x, 3] ** x :-> v ** (x + 1) :-> l ** (x + 2) :-> r ** tree(l, s1) ** tree(r, s2)}
+}
+
+predicate dll(loc x, loc z, set s) {
+|  x == 0 => { s == {} ; emp }
+|  not (x == 0) =>
+   { s == {v} ++ s1 ; [x, 3] ** x :-> v ** (x + 1) :-> w ** (x + 2) :-> z ** dll(w, x, s1) }
+}
+
+predicate ulist(loc x, set s) {
+|  x == 0        => { s == {} ; emp }
+|  not (x == 0)  => { s == {v} ++ s1 /\ not (v in s1); [x, 2] ** x :-> v ** (x + 1) :-> nxt ** ulist(nxt, s1) }
+}
+
+predicate treeN(loc x, int n) {
+|  x == 0        => { n == 0 ; emp }
+|  not (x == 0)  => { n == 1 + n1 + n2  /\  0 <= n1  /\  0 <= n2 ;
+                     [x, 3] ** x :-> v ** (x + 1) :-> l ** (x + 2) :-> r ** treeN(l, n1) ** treeN(r, n2)}
+}
+
+
+predicate srtl(loc x, interval s, int len) {
+|  x == 0        => { len == 0 && s == [] ; emp }
+|  not (x == 0)  => { len == len1 + 1  &&  len1 >= 0 &&
+                      s == [v] + s1 && lower s == v ;
+                      [x, 2] ** x :-> v ** (x + 1) :-> nxt ** srtl(nxt, s1, len1) }
+}
+
+predicate descl(loc x, interval s, int len) {
+|  x == 0        => { len == 0 && s == [] ; emp }
+|  not (x == 0)  => { len == len1 + 1  &&  len1 >= 0 &&
+                      s == [v] + s1 && upper s == v ;
+                      [x, 2] ** x :-> v ** (x + 1) :-> nxt ** descl(nxt, s1, len1) }
+}
+
+
+predicate sll_bounded(loc x, int len, interval s) {
+|  x == 0        => { len == 0  && s == [] ; emp }
+|  not (x == 0)  => { 0 <= len1 && len == len1 + 1 && s == s1 + [v]  ;
+                      [x, 2] ** x :-> v ** (x + 1) :-> nxt ** sll_bounded(nxt, len1, s1) }
+}
+
+predicate lseg(loc x, set s) {
+|  x == null        => { s =i {} ; emp }
+|  not (x == null)  => { s =i {v} ++ s1 ; [x, 2] ** x :-> v ** (x + 1) :-> nxt ** lseg(nxt, s1) }
+}
+
+predicate lseg2(loc x, loc y, set s) {
+|  x == y        => { s =i {} ; emp }
+|  not (x == y)  => { s =i {v} ++ s1 ; [x, 2] ** x :-> v ** (x + 1) :-> nxt ** lseg2(nxt, y, s1) }
+}

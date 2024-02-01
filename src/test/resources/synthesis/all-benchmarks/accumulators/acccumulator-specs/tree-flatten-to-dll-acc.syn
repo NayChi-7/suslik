@@ -1,0 +1,59 @@
+# -p true -c 2
+
+flatten the tree into a doubly-linked list in place
+
+####
+
+{tree (x,s) ** ans :-> ori_start_loc ** dll(ori_start_loc, ori_prev, acc)}
+void flatten (loc x, loc ans)
+{ final_res == s ++ acc ; ans :-> new_start_loc ** dll (new_start_loc, ori_start_loc, final_res)}
+
+####
+
+
+{ans :-> ori_start_loc ** dll(ori_start_loc, ori_prev, acc)<_alpha_11> ** tree(x, s)<_alpha_10>}
+{final_res == s + acc ; ans :-> new_start_loc ** dll(new_start_loc, ori_start_loc, final_res)<_alpha_12>}
+void flatten (loc x, loc ans) {
+  let o = *ans;
+  if (o == 0) {
+    flatten00(o, x, ans);
+  } else {
+    let w = *(o + 1);
+    *ans = w;
+    flatten(x, ans);
+    let n = *ans;
+    if (n == 0) {
+      *ans = o;
+      *(o + 2) = o;
+      *(o + 1) = 0;
+    } else {
+      *(n + 2) = o;
+      *ans = o;
+      *(o + 2) = o;
+      *(o + 1) = n;
+    }
+  }
+}
+
+{acc =i {} && not (a == 0) && o == 0 ; a :-> o ** tree(x, s)<_alpha_10>}
+{not (a == 0) ; a :-> new_start_loc ** dll(new_start_loc, o, s ++ acc)<_alpha_12>}
+void flatten00 (loc o, loc x, loc a) {
+  if (x == 0) {
+  } else {
+    let l = *(x + 1);
+    let r = *(x + 2);
+    flatten00(0, l, a);
+    flatten(r, a);
+    let n = *a;
+    if (n == 0) {
+      *a = x;
+      *(x + 2) = o;
+      *(x + 1) = 0;
+    } else {
+      *(n + 2) = x;
+      *a = x;
+      *(x + 2) = o;
+      *(x + 1) = n;
+    }
+  }
+}

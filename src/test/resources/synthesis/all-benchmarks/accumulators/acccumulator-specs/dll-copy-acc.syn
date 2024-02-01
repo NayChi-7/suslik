@@ -1,0 +1,69 @@
+# -c 2 -f 1
+
+should be able to synthesize list copy
+
+#####
+
+{ true; dll (x, a, s) ** ans :-> ori_start_loc ** dll(ori_start_loc, ori_prev, acc)}
+void dll_copy (loc x, loc ans)
+{final_res =i s ++ acc; ans :-> new_start_loc ** dll (new_start_loc, ori_start_loc, final_res) ** dll(x,a,s)}
+
+#####
+
+
+{ans :-> ori_start_loc ** dll(ori_start_loc, ori_prev, acc)<_alpha_11> ** dll(x, a, s)<_alpha_10>}
+{final_res == s + acc ; ans :-> new_start_loc ** dll(new_start_loc, ori_start_loc, final_res)<_alpha_12> ** dll(x, a, s)<_alpha_13>}
+void dll_copy (loc x, loc ans) {
+  let o = *ans;
+  if (o == 0) {
+    dll_copy00(o, x, ans);
+  } else {
+    let w = *(o + 1);
+    *ans = w;
+    dll_copy(x, ans);
+    let n = *ans;
+    if (n == 0) {
+      *ans = o;
+      *(o + 2) = o;
+      *(o + 1) = 0;
+    } else {
+      *(n + 2) = o;
+      *ans = o;
+      *(o + 2) = o;
+      *(o + 1) = n;
+    }
+  }
+}
+
+{acc =i {} && not (a == 0) && o == 0 ; a :-> o ** dll(x, a, s)<_alpha_10>}
+{not (a == 0) ; a :-> new_start_loc ** dll(new_start_loc, o, s ++ acc)<_alpha_12> ** dll(x, a, s)<_alpha_13>}
+void dll_copy00 (loc o, loc x, loc a) {
+  if (x == 0) {
+  } else {
+    let vx = *x;
+    let w = *(x + 1);
+    dll_copy00(0, w, a);
+    let ne = *a;
+    if (ne == 0) {
+      let n = malloc(3);
+      *a = n;
+      *(x + 1) = 0;
+      *(n + 1) = 0;
+      *(n + 2) = o;
+      *n = vx;
+    } else {
+      let v = *ne;
+      let n = malloc(3);
+      *(ne + 2) = n;
+      *a = n;
+      *(n + 1) = ne;
+      *(n + 2) = o;
+      *n = v;
+      *ne = vx;
+    }
+  }
+}
+
+
+
+

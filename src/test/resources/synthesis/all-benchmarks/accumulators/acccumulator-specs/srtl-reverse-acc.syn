@@ -1,0 +1,11 @@
+# -c 2 -p true
+
+reverse a list
+
+#####
+
+{ 0 <= n ; srtl (x, s, n) ** ans :-> ori_loc ** descl (ori_loc, acc, m)}
+void reverse (loc x, loc ans)
+{ final_res == s ++ acc /\ length == n + m; ans :-> new_loc ** descl (new_loc, final_res, length)}
+
+#####
