@@ -1,0 +1,12 @@
+#####
+
+{ 0 <= len1 && len == len1 + 1 && s == s1 + [v]; [x, 2] ** x :-> v ** (x + 1) :-> nxt ** sll_bounded(nxt, len1, s1) ** ret :-> a}
+void sll_length(loc x, loc ret)
+{a1 == a + 1; sll_bounded(x, len, s) ** ret :-> a1}
+
+#####
+
+void sll_length (loc x, loc ret) {
+  let a = *ret;
+  *ret = a + 1;
+}

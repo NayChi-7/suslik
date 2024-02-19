@@ -1,0 +1,12 @@
+
+#####
+
+{ 0 <= len1 && len == len1 + 1 && s == s1 + [v]; [x, 2] ** x :-> v ** (x + 1) :-> nxt ** sll_bounded(nxt, len1, s1)}
+void sll_length(loc x, loc ret)
+{true; sll_bounded(x, len, s)}
+
+#####
+
+void sll_length (loc x, loc ret) {
+}
+

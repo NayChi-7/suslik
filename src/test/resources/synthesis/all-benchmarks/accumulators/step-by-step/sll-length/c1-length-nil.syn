@@ -1,0 +1,9 @@
+Step 1: x-list is Nil, nothing to do here
+
+#####
+
+{ x == 0  /\  s =i {} ; r :-> a ** sll_bounded(x, n, s) }
+void sll_length(loc x, loc r)
+{ret :-> n ** sll_bounded(x, n, s)}
+
+#####
