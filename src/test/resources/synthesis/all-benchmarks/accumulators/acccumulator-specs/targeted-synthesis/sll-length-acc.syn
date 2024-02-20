@@ -1,0 +1,22 @@
+singly-linked list: length
+
+#####
+
+{ 0 <= n /\ 0<= acc; sll_bounded (x, n, s) ** ans :-> acc}
+void sll_len (loc x, loc ans)
+{ final_res == acc + n; ans :-> final_res ** sll_bounded(x, n, s)}
+
+#####
+
+
+{0 <= n ; ans :-> acc ** sll_bounded(x, n, s)<_alpha_10>}
+{final_res == acc + n ; ans :-> final_res ** sll_bounded(x, n, s)<_alpha_11>}
+void sll_len (loc x, loc ans) {
+  let a = *ans;
+  if (x == 0) {
+  } else {
+    let n = *(x + 1);
+    *ans = a + 1;
+    sll_len(n, ans);
+  }
+}

@@ -1,0 +1,31 @@
+# -p true
+
+should be able to flatten the tree into a list
+
+####
+
+{ tree (x,s) ** ans :-> ori_loc ** sll(ori_loc, acc)}
+void flatten (loc x, loc ans)
+{ final_res == s ++ acc;  ans :-> new_loc ** sll (new_loc, final_res)}
+
+####
+
+
+{ans :-> ori_loc ** sll(ori_loc, acc)<_alpha_13> ** tree(x, s)<_alpha_12>}
+{final_res == s + acc ; ans :-> new_loc ** sll(new_loc, final_res)<_alpha_14>}
+void flatten (loc x, loc ans) {
+  if (x == 0) {
+  } else {
+    let v = *x;
+    let l = *(x + 1);
+    let r = *(x + 2);
+    flatten(l, ans);
+    flatten(r, ans);
+    let ne = *ans;
+    let n = malloc(2);
+    free(x);
+    *ans = n;
+    *(n + 1) = ne;
+    *n = v;
+  }
+}
