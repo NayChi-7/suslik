@@ -1,0 +1,37 @@
+# -p true
+
+should be able to flatten the tree into a list
+
+####
+
+{ tree (x,s) ** ans :-> ori_loc ** sll(ori_loc, acc)}
+void flatten_acc (loc x, loc ans)
+{ final_res == s ++ acc;  ans :-> new_loc ** sll (new_loc, final_res)}
+
+
+{ z :-> x ** tree(x, s) }
+void flatten(loc z)
+{ z :-> y ** sll(y, s) }
+
+####
+
+{z :-> x ** tree(x, s)<_alpha_15>}
+{z :-> y ** sll(y, s)<_alpha_16>}
+void flatten (loc z) {
+  let x = *z;
+  if (x == 0) {
+  } else {
+    let v = *x;
+    let l = *(x + 1);
+    let r = *(x + 2);
+    *z = l;
+    flatten(z);
+    flatten_acc(r, z);
+    let n = *z;
+    let y = malloc(2);
+    free(x);
+    *z = y;
+    *(y + 1) = n;
+    *y = v;
+  }
+}

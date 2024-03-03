@@ -1,0 +1,21 @@
+should be able to synthesize tree size
+
+#####
+
+{ 0 <= n ; r :-> acc ** treeN(x,n) }
+void tree_size_acc (loc x, loc r)
+{ final_res == acc + n; r :-> final_res ** treeN(x,n)}
+
+
+{0 <= n ; r :-> 0 ** treeN(x, n) }
+void tree_size(loc x, loc r)
+{true ; r :-> n ** treeN(x, n) }
+
+#####
+
+{0 <= n ; r :-> 0 ** treeN(x, n)<_alpha_14>}
+{r :-> n ** treeN(x, n)<_alpha_15>}
+void tree_size (loc x, loc r) {
+  tree_size_acc(x, r);
+}
+

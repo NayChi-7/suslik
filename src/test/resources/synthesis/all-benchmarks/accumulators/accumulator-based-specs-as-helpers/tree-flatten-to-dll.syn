@@ -1,0 +1,40 @@
+# -p true -c 2
+
+flatten the tree into a doubly-linked list in place
+
+####
+
+{tree (x,s) ** ans :-> ori_start_loc ** dll(ori_start_loc, ori_prev, acc)}
+void flatten_acc (loc x, loc ans)
+{ final_res == s ++ acc ; ans :-> new_start_loc ** dll (new_start_loc, ori_start_loc, final_res)}
+
+
+{ tree(x, s) }
+void flatten(loc x)
+{ dll(x, y, s) }
+
+####
+
+
+{tree(x, s)<_alpha_15>}
+{dll(x, y, s)<_alpha_16>}
+void flatten (loc x) {
+  if (x == 0) {
+  } else {
+    let v = *x;
+    let l = *(x + 1);
+    let r = *(x + 2);
+    flatten(l);
+    *x = l;
+    flatten_acc(r, x);
+    let n = *x;
+    if (n == 0) {
+      *(x + 1) = 0;
+      *x = v;
+    } else {
+      *(n + 2) = x;
+      *(x + 1) = n;
+      *x = v;
+    }
+  }
+}

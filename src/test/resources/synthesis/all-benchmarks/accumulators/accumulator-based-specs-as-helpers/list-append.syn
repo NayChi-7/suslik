@@ -1,0 +1,27 @@
+
+####
+
+{true ; lseg(x1, s1) ** lseg(x2, s2) ** ans :-> x3 ** lseg(x3, acc)}
+void list_append_acc (loc x1, loc x2, loc ans)
+{s =i s1 ++ s2 ++ acc; lseg(new_loc, s) ** ans :-> new_loc }
+
+
+{true ; lseg(x1, s1) ** lseg(x2, s2) ** ret :-> x2}
+void list_append (loc x1, loc ret)
+{s =i s1 ++ s2 ; lseg(y, s) ** ret :-> y }
+
+####
+
+
+{ret :-> x2 ** lseg(x1, s1)<_alpha_16> ** lseg(x2, s2)<_alpha_17>}
+{s == s1 + s2 ; ret :-> y ** lseg(y, s)<_alpha_18>}
+void list_append (loc x1, loc ret) {
+  if (x1 == 0) {
+  } else {
+    let n = *(x1 + 1);
+    list_append(n, ret);
+    let y = *ret;
+    *ret = x1;
+    *(x1 + 1) = y;
+  }
+}
