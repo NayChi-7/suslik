@@ -81,7 +81,7 @@ class PhasedSynthesis(config: SynConfig) extends Tactic {
     UnfoldingRules.AbduceCall,
     UnfoldingRules.Open,
     UnfoldingRules.Close,
-//    UnfoldingRules.AbduceCall, // HERE: move AbduceCall here to achieve old behavior
+    UnfoldingRules.AbduceCall, // HERE: move AbduceCall here to achieve old behavior
   )
 
   protected def unfoldingPostPhaseRules: List[SynthesisRule] = List(

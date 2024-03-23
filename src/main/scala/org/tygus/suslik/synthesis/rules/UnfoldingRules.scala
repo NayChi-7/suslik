@@ -78,6 +78,69 @@ object UnfoldingRules extends SepLogicUtils with RuleUtils {
 
     override def toString: Ident = "TryCall"
 
+    def get_return_type(post_cond: Assertion): String = {
+      val sigma = post_cond.sigma
+      val sapps = sigma.apps
+      val heaplets = sigma.chunks
+      var result: String = "type not determined yet"
+
+      val final_payload_ref_opt: Option[Expr] = heaplets.collectFirst {
+        case obj: PointsTo => obj.value
+      }
+
+      if (final_payload_ref_opt.isEmpty & sapps.length == 1) {
+        result = sapps.head.pred
+      } else if (final_payload_ref_opt.nonEmpty) {
+        result = final_payload_ref_opt match {
+          case Some(final_payload) =>
+            val return_type = sapps.collectFirst {
+              case sapp@SApp(pred, List(`final_payload`, _*), _, _) => pred
+              case _ =>
+                "int"
+            }
+            println(s"return_type: $return_type")
+            return_type.get
+        }
+
+      }
+      result
+    }
+
+    def determine_return_type_based_on_positionality(data_structure_associated_with_return_element: SApp) = {
+      val data_structure_name = data_structure_associated_with_return_element.pred
+      val arguments = data_structure_associated_with_return_element.args
+      var return_type = "not determined yet"
+
+      if (data_structure_name == "sll_bounded") {
+        return_type = "int"
+      } else if (data_structure_name == "treeN") {
+        return_type = "int"
+      }
+      return_type
+    }
+
+    // TODO: Generalise this line by analysing the callee's postcondition
+    def create_new_args_based_on_post_condition_p_formula(post_cond: Assertion) = {
+
+    }
+
+    def create_empty_instance(goal: Goal, return_type: String) = {
+      var empty_instance: Option[SApp] = None
+      var new_args: List[Expr] = List()
+      if (return_type == "sll") {
+        new_args = List(IntConst(0), SetLiteral(List()))
+        empty_instance = Some(SApp("sll", new_args, PTag(0, 0), freshVar(goal.vars, "_pred_")))
+      } else if (return_type == "dll") {
+        new_args = List(IntConst(0), Var("new_prev_loc"), SetLiteral(List()))
+        empty_instance = Some(SApp("dll", new_args, PTag(0, 0), freshVar(goal.vars, "_pred_")))
+      } else if (return_type == "lseg") {
+        new_args = List(IntConst(0), SetLiteral(List()))
+        empty_instance = Some(SApp("lseg", new_args, PTag(0, 0), freshVar(goal.vars, "_pred_")))
+      }
+      empty_instance
+    }
+
+
     def apply(goal: Goal): Seq[RuleResult] = {
       val cands = goal.companionCandidates
       val funLabels = cands.map(a => (a.toFunSpec, Some(a.label))) ++ // companions
@@ -86,19 +149,39 @@ object UnfoldingRules extends SepLogicUtils with RuleUtils {
         (_f, l) <- funLabels
         (freshSub, f) = _f.refreshAll(goal.vars)
 
-        // Optimization: do not consider f if its pre has predicates that cannot possibly match ours
-        if multiSubset(f.pre.sigma.profile.apps, goal.pre.sigma.profile.apps)
-        if (goal.env.config.maxCalls :: goal.pre.sigma.callTags).min < goal.env.config.maxCalls
+        goal_to_abduce: Goal <- {
+          if (goal.env.config.accumulator) {
+            val return_type = get_return_type(f.post)
+            val empty_instance = create_empty_instance(goal, return_type)
 
-        newGamma = goal.gamma ++ (f.params ++ f.var_decl).toMap // Add f's (fresh) variables to gamma
+            val new_sigma = if (empty_instance.isEmpty) {
+              SFormula(goal.pre.sigma.chunks :+ empty_instance.get)
+            } else {
+              goal.pre.sigma
+            }
+
+            val new_pre = goal.pre.copy(phi = goal.pre.phi, sigma = new_sigma)
+            val new_goal = goal.copy(pre = new_pre)
+            Some(new_goal)
+          } else {
+            Some(goal)
+          }
+        }
+
+        if multiSubset(f.pre.sigma.profile.apps, goal_to_abduce.pre.sigma.profile.apps)
+        if (goal_to_abduce.env.config.maxCalls :: goal_to_abduce.pre.sigma.callTags).min < goal_to_abduce.env.config.maxCalls
+
+        newGamma = goal_to_abduce.gamma ++ (f.params ++ f.var_decl).toMap // Add f's (fresh) variables to gamma
         call = Call(Var(f.name), f.params.map(_._1), l)
         calleePostSigma = f.post.sigma.setSAppTags(PTag(1, 0))
         callePost = Assertion(f.post.phi, calleePostSigma)
-        suspendedCallGoal = Some(SuspendedCallGoal(goal.pre, goal.post, callePost, call, freshSub))
-        newGoal = goal.spawnChild(post = f.pre, gamma = newGamma, callGoal = suspendedCallGoal)
+        suspendedCallGoal = Some(SuspendedCallGoal(goal_to_abduce.pre, goal_to_abduce.post, callePost, call, freshSub))
+
+        newGoal = goal_to_abduce.spawnChild(post = f.pre, gamma = newGamma, callGoal = suspendedCallGoal)
+
       } yield {
-        val kont: StmtProducer = AbduceCallProducer(f) >> IdProducer >> ExtractHelper(goal)
-        RuleResult(List(newGoal), kont, this, goal)
+        val kont: StmtProducer = AbduceCallProducer(f) >> IdProducer >> ExtractHelper(goal_to_abduce)
+        RuleResult(List(newGoal), kont, this, goal_to_abduce)
       }
     }
   }
