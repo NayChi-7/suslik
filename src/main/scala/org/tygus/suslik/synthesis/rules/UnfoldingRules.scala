@@ -4,10 +4,11 @@ import org.tygus.suslik.language.Expressions._
 import org.tygus.suslik.language.Statements._
 import org.tygus.suslik.language.{CardType, Ident}
 import org.tygus.suslik.logic.Specifications._
-import org.tygus.suslik.logic._
+import org.tygus.suslik.logic.{SApp, _}
 import org.tygus.suslik.logic.smt.SMTSolving
 import org.tygus.suslik.synthesis.Termination.Transition
 import org.tygus.suslik.synthesis._
+import org.tygus.suslik.synthesis.rules.OperationalRules.ReadRule.freshVar
 import org.tygus.suslik.synthesis.rules.Rules._
 
 /**
@@ -90,7 +91,7 @@ object UnfoldingRules extends SepLogicUtils with RuleUtils {
 
       if (final_payload_ref_opt.isEmpty & sapps.length == 1) {
         result = sapps.head.pred
-      } else if (final_payload_ref_opt.nonEmpty) {
+      } else if (final_payload_ref_opt.nonEmpty){
         result = final_payload_ref_opt match {
           case Some(final_payload) =>
             val return_type = sapps.collectFirst {
@@ -119,25 +120,26 @@ object UnfoldingRules extends SepLogicUtils with RuleUtils {
     }
 
     // TODO: Generalise this line by analysing the callee's postcondition
-    def create_new_args_based_on_post_condition_p_formula(post_cond: Assertion) = {
+    def create_new_args_based_on_post_condition_p_formula (post_cond: Assertion) = {
 
     }
 
     def create_empty_instance(goal: Goal, return_type: String) = {
       var empty_instance: Option[SApp] = None
       var new_args: List[Expr] = List()
-      if (return_type == "sll") {
+      if (return_type == "sll"){
         new_args = List(IntConst(0), SetLiteral(List()))
         empty_instance = Some(SApp("sll", new_args, PTag(0, 0), freshVar(goal.vars, "_pred_")))
       } else if (return_type == "dll") {
         new_args = List(IntConst(0), Var("new_prev_loc"), SetLiteral(List()))
-        empty_instance = Some(SApp("dll", new_args, PTag(0, 0), freshVar(goal.vars, "_pred_")))
+        empty_instance = Some (SApp("dll", new_args, PTag(0, 0), freshVar(goal.vars, "_pred_")))
       } else if (return_type == "lseg") {
         new_args = List(IntConst(0), SetLiteral(List()))
-        empty_instance = Some(SApp("lseg", new_args, PTag(0, 0), freshVar(goal.vars, "_pred_")))
+        empty_instance = Some (SApp("lseg", new_args, PTag(0, 0), freshVar(goal.vars, "_pred_")))
       }
       empty_instance
     }
+
 
     def apply(goal: Goal): Seq[RuleResult] = {
       val cands = goal.companionCandidates
@@ -148,14 +150,16 @@ object UnfoldingRules extends SepLogicUtils with RuleUtils {
         (freshSub, f) = _f.refreshAll(goal.vars)
 
         goal_to_abduce: Goal <- {
-          if (goal.env.config.accumulator) {
+          if(goal.env.config.accumulator){
             val return_type = get_return_type(f.post)
             val empty_instance = create_empty_instance(goal, return_type)
+
             val new_sigma = if (empty_instance.nonEmpty) {
               SFormula(goal.pre.sigma.chunks :+ empty_instance.get)
             } else {
               goal.pre.sigma
             }
+
             val new_pre = goal.pre.copy(phi = goal.pre.phi, sigma = new_sigma)
             val new_goal = goal.copy(pre = new_pre)
             Some(new_goal)
@@ -175,6 +179,7 @@ object UnfoldingRules extends SepLogicUtils with RuleUtils {
         suspendedCallGoal = Some(SuspendedCallGoal(goal_to_abduce.pre, goal_to_abduce.post, callePost, call, freshSub))
 
         newGoal = goal_to_abduce.spawnChild(post = f.pre, gamma = newGamma, callGoal = suspendedCallGoal)
+
       } yield {
         val kont: StmtProducer = AbduceCallProducer(f) >> IdProducer >> ExtractHelper(goal_to_abduce)
         RuleResult(List(newGoal), kont, this, goal_to_abduce)

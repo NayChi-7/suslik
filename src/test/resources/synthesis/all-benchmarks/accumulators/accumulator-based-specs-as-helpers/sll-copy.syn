@@ -6,9 +6,9 @@ should be able to synthesize list copy
 void sll_copy_acc (loc x, loc ans)
 {final_res == s ++ acc; ans :-> new_loc ** sll (new_loc, final_res) ** sll(x,s)}
 
-{true ; r :-> x ** sll(x, s)<a>}
+{true ; r :-> x ** sll(x, s)}
 void sll_copy(loc r)
-{true ; r :-> y ** sll(x, s)<a> ** sll(y, s)<b> }
+{true ; r :-> y ** sll(x, s) ** sll(y, s) }
 
 #####
 

@@ -8,10 +8,9 @@ flatten the tree into a doubly-linked list in place
 void flatten_acc (loc x, loc ans)
 { final_res == s ++ acc ; ans :-> new_start_loc ** dll (new_start_loc, ori_start_loc, final_res)}
 
-
-{ tree(x, s) }
-void flatten(loc x)
-{ dll(x, y, s) }
+{ r:-> x ** tree(x, s)}
+void flatten(loc r)
+{ r:-> p ** dll(p, y, s) }
 
 ####
 
@@ -38,3 +37,15 @@ void flatten (loc x) {
     }
   }
 }
+
+{r :-> x ** dll(0, c, {})<_alpha_16> ** tree(x, s)<_alpha_15>}
+{r :-> p ** dll(p, y, s)<_alpha_17>}
+void flatten (loc r) {
+  let x = *r;
+  *r = 0;
+  flatten_acc(x, r);
+}
+
+
+
+

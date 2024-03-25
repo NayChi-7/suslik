@@ -81,7 +81,7 @@ object DelegatePureSynthesis {
       case Expressions.OpIntervalIn => "imember"
       case Expressions.OpIntervalUnion => "iunion"
       case Expressions.OpRange => "interval"
-      case e => throw SynthesisException(s"Not supported: ${e.pp} (${e.getClass.getName})")  
+      case e => throw SynthesisException(s"Not supported: ${e.pp} (${e.getClass.getName})")
     }) ++= " "
       toSmtExpr(left, existentials, sb)
       sb ++= " "
