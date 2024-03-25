@@ -150,7 +150,7 @@ object UnfoldingRules extends SepLogicUtils with RuleUtils {
         (freshSub, f) = _f.refreshAll(goal.vars)
 
         goal_to_abduce: Goal <- {
-          if(goal.env.config.accumulator){
+          if(1==0){
             val return_type = get_return_type(f.post)
             val empty_instance = create_empty_instance(goal, return_type)
 

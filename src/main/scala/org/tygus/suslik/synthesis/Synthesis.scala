@@ -1,6 +1,7 @@
 package org.tygus.suslik.synthesis
 
 import org.tygus.suslik.language.Statements.{Solution, _}
+import org.tygus.suslik.language.Expressions._
 import org.tygus.suslik.logic.Specifications._
 import org.tygus.suslik.logic._
 import org.tygus.suslik.logic.smt.{CyclicProofChecker, SMTSolving}
@@ -21,7 +22,47 @@ import scala.annotation.tailrec
   */
 
 class Synthesis(tactic: Tactic, implicit val log: Log, implicit val trace: ProofTrace) extends SepLogicUtils {
+  def get_return_type(post_cond: Assertion): String = {
+    val sigma = post_cond.sigma
+    val sapps = sigma.apps
+    val heaplets = sigma.chunks
+    var result: String = "type not determined yet"
 
+    val final_payload_ref_opt: Option[Expr] = heaplets.collectFirst {
+      case obj: PointsTo => obj.value
+    }
+
+    if (final_payload_ref_opt.isEmpty & sapps.length == 1) {
+      result = sapps.head.pred
+    } else if (final_payload_ref_opt.nonEmpty){
+      result = final_payload_ref_opt match {
+        case Some(final_payload) =>
+          val return_type = sapps.collectFirst {
+            case sapp@SApp(pred, List(`final_payload`, _*), _, _) => pred
+            case _ =>
+              "int"
+          }
+          return_type.get
+      }
+
+    }
+    result
+  }
+  def create_empty_instance(goal: Goal, return_type: String) = {
+    var empty_instance: Option[SApp] = None
+    var new_args: List[Expr] = List()
+    if (return_type == "sll"){
+      new_args = List(IntConst(0), SetLiteral(List()))
+      empty_instance = Some(SApp("sll", new_args, PTag(0, 0), freshVar(goal.vars, "_pred_")))
+    } else if (return_type == "dll") {
+      new_args = List(IntConst(0), Var("new_prev_loc"), SetLiteral(List()))
+      empty_instance = Some (SApp("dll", new_args, PTag(0, 0), freshVar(goal.vars, "_pred_")))
+    } else if (return_type == "lseg") {
+      new_args = List(IntConst(0), SetLiteral(List()))
+      empty_instance = Some (SApp("lseg", new_args, PTag(0, 0), freshVar(goal.vars, "_pred_")))
+    }
+    empty_instance
+  }
   def synthesizeProc(funGoal: FunSpec, env: Environment, sketch: Statement): (List[Procedure], SynStats) = {
     implicit val config: SynConfig = env.config
     implicit val stats: SynStats = env.stats
@@ -40,7 +81,21 @@ class Synthesis(tactic: Tactic, implicit val log: Log, implicit val trace: Proof
         Console.RED, 2)
     }
 
-    val goal = topLevelGoal(pre, post, formals, name, env, sketch, var_decl)
+    var goal = topLevelGoal(pre, post, formals, name, env, sketch, var_decl)
+    var safetygoal = goal
+    if (goal.env.config.accumulator) {
+      val acc = goal.env.functions.values
+      assert(acc.size == 1)
+      var (freshSub, f) = acc.head.refreshAll(goal.vars)
+      val return_type = get_return_type(f.post)
+      val empty_instance = create_empty_instance(goal, return_type)
+      assert(empty_instance.nonEmpty)
+      val new_sigma = SFormula(goal.pre.sigma.chunks :+ empty_instance.get)
+      val new_pre = goal.pre.copy(phi = goal.pre.phi, sigma = new_sigma)
+      safetygoal = goal.copy(post = new_pre)
+      goal = goal.copy(pre = new_pre)
+    }
+
     log.print("Initial specification:", Console.RESET)
     log.print(s"${goal.pp}\n", Console.BLUE)
     SMTSolving.init()
@@ -50,6 +105,7 @@ class Synthesis(tactic: Tactic, implicit val log: Log, implicit val trace: Proof
       synthesize(goal)(stats = stats) match {
         case Some((body, helpers)) =>
           log.print(s"Succeeded leaves (${successLeaves.length}): ${successLeaves.map(n => s"${n.pp()}").mkString(" ")}", Console.YELLOW, 2)
+          // TODO: check whether the safety goal is achieved without any operations
           val main = Procedure(funGoal, body)
           (main :: helpers, stats)
         case None =>
@@ -61,6 +117,7 @@ class Synthesis(tactic: Tactic, implicit val log: Log, implicit val trace: Proof
         log.out.printlnErr(msg)
         (Nil, stats)
     }
+    
   }
 
   protected def synthesize(goal: Goal)
