@@ -98,7 +98,6 @@ object UnfoldingRules extends SepLogicUtils with RuleUtils {
               case _ =>
                 "int"
             }
-            println(s"return_type: $return_type")
             return_type.get
         }
 
@@ -140,7 +139,6 @@ object UnfoldingRules extends SepLogicUtils with RuleUtils {
       empty_instance
     }
 
-
     def apply(goal: Goal): Seq[RuleResult] = {
       val cands = goal.companionCandidates
       val funLabels = cands.map(a => (a.toFunSpec, Some(a.label))) ++ // companions
@@ -153,13 +151,11 @@ object UnfoldingRules extends SepLogicUtils with RuleUtils {
           if (goal.env.config.accumulator) {
             val return_type = get_return_type(f.post)
             val empty_instance = create_empty_instance(goal, return_type)
-
-            val new_sigma = if (empty_instance.isEmpty) {
+            val new_sigma = if (empty_instance.nonEmpty) {
               SFormula(goal.pre.sigma.chunks :+ empty_instance.get)
             } else {
               goal.pre.sigma
             }
-
             val new_pre = goal.pre.copy(phi = goal.pre.phi, sigma = new_sigma)
             val new_goal = goal.copy(pre = new_pre)
             Some(new_goal)
@@ -171,6 +167,7 @@ object UnfoldingRules extends SepLogicUtils with RuleUtils {
         if multiSubset(f.pre.sigma.profile.apps, goal_to_abduce.pre.sigma.profile.apps)
         if (goal_to_abduce.env.config.maxCalls :: goal_to_abduce.pre.sigma.callTags).min < goal_to_abduce.env.config.maxCalls
 
+
         newGamma = goal_to_abduce.gamma ++ (f.params ++ f.var_decl).toMap // Add f's (fresh) variables to gamma
         call = Call(Var(f.name), f.params.map(_._1), l)
         calleePostSigma = f.post.sigma.setSAppTags(PTag(1, 0))
@@ -178,7 +175,6 @@ object UnfoldingRules extends SepLogicUtils with RuleUtils {
         suspendedCallGoal = Some(SuspendedCallGoal(goal_to_abduce.pre, goal_to_abduce.post, callePost, call, freshSub))
 
         newGoal = goal_to_abduce.spawnChild(post = f.pre, gamma = newGamma, callGoal = suspendedCallGoal)
-
       } yield {
         val kont: StmtProducer = AbduceCallProducer(f) >> IdProducer >> ExtractHelper(goal_to_abduce)
         RuleResult(List(newGoal), kont, this, goal_to_abduce)
