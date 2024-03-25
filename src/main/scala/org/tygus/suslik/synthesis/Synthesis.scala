@@ -14,6 +14,7 @@ import org.tygus.suslik.synthesis.rules.Rules._
 import org.tygus.suslik.synthesis.tactics.Tactic
 import org.tygus.suslik.util.SynStats
 
+
 import scala.Console
 import scala.annotation.tailrec
 
@@ -64,6 +65,7 @@ class Synthesis(tactic: Tactic, implicit val log: Log, implicit val trace: Proof
     empty_instance
   }
   def synthesizeProc(funGoal: FunSpec, env: Environment, sketch: Statement): (List[Procedure], SynStats) = {
+    import log.out.testPrintln
     implicit val config: SynConfig = env.config
     implicit val stats: SynStats = env.stats
     val FunSpec(name, tp, formals, pre, post, var_decl) = funGoal
@@ -105,6 +107,14 @@ class Synthesis(tactic: Tactic, implicit val log: Log, implicit val trace: Proof
       synthesize(goal)(stats = stats) match {
         case Some((body, helpers)) =>
           log.print(s"Succeeded leaves (${successLeaves.length}): ${successLeaves.map(n => s"${n.pp()}").mkString(" ")}", Console.YELLOW, 2)
+          synthesize(safetygoal)(stats = stats) match {
+            case Some((b,h)) =>
+              b match {
+                case Skip => testPrintln("Safety goal achieved without any operations")
+                case _ => testPrintln("Safety goal error")
+              }
+            case None => testPrintln("Safety goal error")
+          }
           // TODO: check whether the safety goal is achieved without any operations
           val main = Procedure(funGoal, body)
           (main :: helpers, stats)
