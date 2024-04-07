@@ -30,6 +30,7 @@ object SynthesisRunner extends SynthesisRunnerUtil {
     * -o, --maxOpenDepth <value>     maximum unfolding depth in the pre-condition; default: 1
     * -f, --maxCallDepth <value>     maximum call depth; default: 1
     * -x, --auxAbduction <value>     abduce auxiliary functions; default: false
+    * -g, --accSpecGen <value>       generate candidate specs with accumulator: false
     * -h, --accSpecAsHelper <value>  synthesise client spec using accumulator spec as helper: false
     * --topLevelRecursion <value>    allow top-level recursion; default: true
     * -b, --branchAbduction <value>  abduce conditional branches; default: false
@@ -169,8 +170,12 @@ object SynthesisRunner extends SynthesisRunnerUtil {
       _.copy(breadthFirst = b)
     }).text("breadth first search (ignore weights); default: false")
 
-    opt[Boolean]('h', name = "accSpecAsHelper").action(cfg { b =>
+    opt[Boolean]('g', name = "accSpecGen").action(cfg { b =>
       _.copy(accumulator = b)
+    }).text("Generate candidates for accumulator spec; default: false")
+
+    opt[Boolean]('h', name = "accSpecAsHelper").action(cfg { b =>
+      _.copy(accumulatorHelper = b)
     }).text("Use accumulator spec as a helper to synthesise the client spec; default: false")
 
     opt[Boolean](name = "delegate").action(cfg { b =>

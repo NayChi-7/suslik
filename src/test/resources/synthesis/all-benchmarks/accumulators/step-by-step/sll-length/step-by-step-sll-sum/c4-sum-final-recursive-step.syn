@@ -1,0 +1,20 @@
+
+#####
+{output == output1 + v && a1 == a + v; [x, 2] ** x :-> v ** x + 1 :-> lnxt ** sllsum(lnxt,output1) ** ret :-> a1}
+void sll_sum_acc (loc x, loc ret)
+{total == a1 + output; ret :-> total ** sllsum(x,output) }
+
+#####
+
+
+
+
+void sll_len (loc x, loc ret) {
+  let a = *ret;
+  if (x == 0) {
+  } else {
+    let n = *(x + 1);
+    *ret = a + 1;
+    sll_len(n, ret);
+  }
+}

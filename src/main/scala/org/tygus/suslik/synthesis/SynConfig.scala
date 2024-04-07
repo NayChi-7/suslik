@@ -30,6 +30,7 @@ case class SynConfig(
                       delegatePure: Boolean = false,
                       extendedPure: Boolean = false,
                       accumulator: Boolean = false,
+                      accumulatorHelper: Boolean = false,
                       // Timeout and logging
                       interactive: Boolean = false,
                       printStats: Boolean = false,

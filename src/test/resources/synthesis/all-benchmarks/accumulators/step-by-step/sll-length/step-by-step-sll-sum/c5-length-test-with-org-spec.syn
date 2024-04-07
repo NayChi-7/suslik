@@ -1,0 +1,18 @@
+
+#####
+
+{ 0 <= n && a == a1 + 1; ret :-> a ** sll_bounded(x, n, s) }
+void sll_len (loc x, loc ret)
+{ total == n + a; ret :-> total ** sll_bounded(x, n, s) }
+
+#####
+
+void sll_len (loc x, loc ret) {
+  let a = *ret;
+  if (x == 0) {
+  } else {
+    let n = *(x + 1);
+    *ret = a + 1;
+    sll_len(n, ret);
+  }
+}

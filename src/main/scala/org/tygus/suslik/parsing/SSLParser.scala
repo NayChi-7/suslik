@@ -257,4 +257,16 @@ class SSLParser extends StandardTokenParsers with SepLogicUtils {
   def parseGoalSUS(input: String): ParseResult[Program] = parse(programSUS)(input)
 
   def parseGoal = parseGoalSYN _
+
+  def extractComponents(parseResult: ParseResult[Program]): Option[(Seq[InductivePredicate], Seq[FunSpec], GoalContainer)] = {
+    parseResult match {
+      case Success(program, _) =>
+        val predicates: Seq[InductivePredicate] = program.predicates
+        val funs: Seq[FunSpec] = program.funs
+        val goal: GoalContainer = program.goal
+        Some((predicates, funs, goal))
+      case Failure(_, _) =>
+        None
+    }
+  }
 }

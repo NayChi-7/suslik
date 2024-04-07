@@ -1,0 +1,16 @@
+
+#####
+
+{output == output1 + v; [x, 2] ** x :-> v ** x + 1 :-> lnxt ** sllsum(lnxt,output1) ** ret :-> a}
+void sll_sum_acc (loc x, loc ret)
+{a1 == a + v; sllsum(x,output)  ** ret :-> a1}
+
+#####
+
+{output == output1 + v ; (x + 1) :-> lnxt ** ret :-> a ** x :-> v ** sllsum(lnxt, output1)<_alpha_13> ** [x, 2]}
+{a1 == a + v ; ret :-> a1 ** sllsum(x, output)<_alpha_14>}
+void sll_sum_acc (loc x, loc ret) {
+  let v = *x;
+  let a = *ret;
+  *ret = a + v;
+}

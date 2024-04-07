@@ -1,0 +1,29 @@
+
+#####
+
+{output == output1 + v; [x, 2] ** x :-> v ** x + 1 :-> lnxt ** sllsum(lnxt,output1)}
+void sll_sum_acc (loc x)
+{true; sllsum(x,output)}
+
+#####
+
+
+{ 0 <= len1 && len == len1 + 1 && s == s1 + [v]; [x, 2] ** x :-> v ** (x + 1) :-> nxt ** sll_bounded(nxt, len1, s1)}
+void sll_length(loc x, loc ret)
+{true; sll_bounded(x, len, s)}
+
+
+{ret :-> acc ** sllsum(x, s) }
+void sll_sum_acc (loc x, loc ret)
+{ final_result == s + acc; ret :-> final_result ** sllsum(x, s) }
+
+
+{ 0 <= n && a == a1 + 1; ret :-> a ** sll_bounded(x, n, s) }
+void sll_len (loc x, loc ret)
+{ total == n + a; ret :-> total ** sll_bounded(x, n, s) }
+
+
+predicate sllsum(loc l, int output){
+| l == null => {output == 0; emp}
+| not (l == null) => {output == output1 + v; [l, 2] ** l :-> v ** l + 1 :-> lnxt ** sllsum(lnxt,output1)}
+}

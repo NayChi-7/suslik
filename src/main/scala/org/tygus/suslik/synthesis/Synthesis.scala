@@ -4,6 +4,7 @@ import org.tygus.suslik.language.Statements.{Solution, _}
 import org.tygus.suslik.language.Expressions._
 import org.tygus.suslik.logic.Specifications._
 import org.tygus.suslik.logic._
+import org.tygus.suslik.logic.accumulators.SpecSynthesiser.generate_new_spec_with_acc
 import org.tygus.suslik.logic.smt.{CyclicProofChecker, SMTSolving}
 import org.tygus.suslik.report.{Log, ProofTrace}
 import org.tygus.suslik.synthesis.Memoization._
@@ -13,7 +14,6 @@ import org.tygus.suslik.synthesis.rules.DelegatePureSynthesis
 import org.tygus.suslik.synthesis.rules.Rules._
 import org.tygus.suslik.synthesis.tactics.Tactic
 import org.tygus.suslik.util.SynStats
-
 
 import scala.Console
 import scala.annotation.tailrec
@@ -84,8 +84,11 @@ class Synthesis(tactic: Tactic, implicit val log: Log, implicit val trace: Proof
     }
 
     var goal = topLevelGoal(pre, post, formals, name, env, sketch, var_decl)
+    if (config.accumulator) {
+      generate_new_spec_with_acc(goal.toFunSpec)
+    }
     var safetygoal = goal
-    if (goal.env.config.accumulator) {
+    if (goal.env.config.accumulatorHelper) {
       val acc = goal.env.functions.values
       assert(acc.size == 1)
       var (freshSub, f) = acc.head.refreshAll(goal.vars)
